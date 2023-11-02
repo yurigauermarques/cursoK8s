@@ -5,10 +5,10 @@ IMAGE_NAME = "ubuntu/jammy64"
 
 Vagrant.configure("2") do |config|
     config.vm.boot_timeout = 600
-    config.vm.define "k8s-plane01" do |plane|
+    config.vm.define "plane" do |plane|
         plane.vm.box = IMAGE_NAME
         plane.vm.network "private_network", ip: "172.16.1.100"
-        plane.vm.network "public_network"
+        plane.vm.network "public_network", :bridge => 'wlp0s20f3'
         plane.vm.provider "virtualbox" do |vb|
             vb.name = "Plane"
             vb.cpus = 4
@@ -18,12 +18,12 @@ Vagrant.configure("2") do |config|
         plane.vm.provision "shell", path: "plane.sh"        
     end
 
-    config.vm.define "k8s-worker-1" do |worker1|
+    config.vm.define "worker1" do |worker1|
         worker1.vm.box = IMAGE_NAME
         worker1.vm.network "private_network", ip: "172.16.1.101"
-        worker1.vm.network "public_network"
+        worker1.vm.network "public_network", :bridge => 'wlp0s20f3'
         worker1.vm.provider "virtualbox" do |vb|
-            vb.name = "Worker-1"
+            vb.name = "Worker1"
             vb.cpus = 2
             vb.memory = 2048
             vb.customize ["modifyvm", :id, "--groups", "/K8S"]
@@ -31,12 +31,12 @@ Vagrant.configure("2") do |config|
         worker1.vm.provision "shell", path: "worker1.sh"        
     end
 
-    config.vm.define "k8s-worker-2" do |worker2|
+    config.vm.define "worker2" do |worker2|
         worker2.vm.box = IMAGE_NAME
         worker2.vm.network "private_network", ip: "172.16.1.102"
-        worker2.vm.network "public_network"
+        worker2.vm.network "public_network", :bridge => 'wlp0s20f3'
         worker2.vm.provider "virtualbox" do |vb|
-            vb.name = "Worker-2"
+            vb.name = "Worker2"
             vb.cpus = 2
             vb.memory = 2048
             vb.customize ["modifyvm", :id, "--groups", "/K8S"]
