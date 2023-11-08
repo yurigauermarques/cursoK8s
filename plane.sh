@@ -42,31 +42,42 @@ sudo tar Cxzvf /opt/cni/bin cni-plugins-linux-amd64-v1.3.0.tgz
 sudo ctr version
 sudo ctr images ls
 
-
 sudo apt-get update
 sudo apt-get install -y apt-transport-https ca-certificates curl
-sudo curl -fsSLo /etc/apt/keyrings/kubernetes-archive-keyring.gpg https://dl.k8s.io/apt/doc/apt-key.gpg
-echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
 sudo apt-get update
 sudo apt-get install -y kubelet kubeadm kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
+sudo apt-get install -y etcd-client
 
-sudo sed -i~ '$ s/$/ --node-ip=172.16.1.100/' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+cat <<EOF | sudo tee /etc/default/kubelet
+KUBELET_EXTRA_ARGS=--node-ip=172.16.1.100
+EOF
 
 sudo systemctl daemon-reload
 sudo systemctl restart kubelet
 
-sudo kubeadm init --pod-network-cidr 10.10.0.0/16 --control-plane-endpoint "172.16.1.100:6443" --apiserver-advertise-address=172.16.1.100
+NODENAME=$(hostname -s)
+sudo kubeadm config images pull
+sudo kubeadm init --apiserver-advertise-address "172.16.1.100" --control-plane-endpoint "172.16.1.100:6443" --pod-network-cidr "10.10.0.0/16" --node-name "$NODENAME"
 
 mkdir --parents "$HOME"/.kube
 sudo cp -i /etc/kubernetes/admin.conf "$HOME"/.kube/config
 sudo chown "$(id -u)":"$(id -g)" "$HOME"/.kube/config
 
-touch /vagrant/join.sh
-chmod +x /vagrant/join.sh
+# Save Configs to shared /Vagrant location
 
-kubeadm token create --print-join-command > /vagrant/join.sh
+# For Vagrant re-runs, check if there is existing configs in the location and delete it for saving new configuration.
+mkdir --parents /vagrant/configs
+rm --force /vagrant/configs/*
+
+cp -i "$HOME"/.kube/config /vagrant/configs/config
+touch /vagrant/configs/join.sh
+chmod +x /vagrant/configs/join.sh
+
+kubeadm token create --print-join-command > /vagrant/configs/join.sh
 
 # Install Calico Network Plugin
-curl https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/calico.yaml -O
-kubectl apply -f calico.yaml
+# curl https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/calico.yaml -O
+# kubectl apply -f calico.yaml
