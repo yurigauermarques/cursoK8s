@@ -66,6 +66,10 @@ mkdir --parents "$HOME"/.kube
 sudo cp -i /etc/kubernetes/admin.conf "$HOME"/.kube/config
 sudo chown "$(id -u)":"$(id -g)" "$HOME"/.kube/config
 
+mkdir --parents /home/vagrant/.kube
+sudo cp -i /etc/kubernetes/admin.conf /home/vagrant/.kube
+sudo chown -R vagrant:vagrant /home/vagrant/.kube
+
 # Save Configs to shared /Vagrant location
 
 # For Vagrant re-runs, check if there is existing configs in the location and delete it for saving new configuration.
@@ -79,5 +83,5 @@ chmod +x /vagrant/configs/join.sh
 kubeadm token create --print-join-command > /vagrant/configs/join.sh
 
 # Install Calico Network Plugin
-# curl https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/calico.yaml -O
-# kubectl apply -f calico.yaml
+curl https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/calico.yaml -O
+kubectl apply -f calico.yaml
