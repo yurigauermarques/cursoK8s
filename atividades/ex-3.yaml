@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: ex-3
+  name: ex-3
+spec:
+  containers:
+  - image: nginx
+    name: container1
+    ports:
+    - containerPort: 80
+    resources: {}
+  - image: redis
+    name: container2
+    ports:
+    - containerPort: 6379
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
