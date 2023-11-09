@@ -11,7 +11,7 @@ Vagrant.configure("2") do |config|
         config.vm.define env['name'] do |host|
           host.vm.box = env['box']
           host.vm.hostname = env['hostname']
-          host.vm.network 'public_network', ip: env['ipaddress']
+          host.vm.network 'private_network', ip: env['ipaddress']
           host.vm.network "public_network", :bridge => env['bridge']
           host.vm.provider 'virtualbox' do |vb|
             vb.name = env['name']
