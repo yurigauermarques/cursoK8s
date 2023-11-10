@@ -41,10 +41,13 @@
 	delete pod ex-1
 
 9 Delete o pod criado no exercício 3 sem nenhum delay.
+	kubectl delete pod ex-3 --grace-period=0
 
 10 Altere a imagem do pod criado no exercício 2 para nginx:alpine
+	kubectl apply -f ex.10.yaml --force
 
 11 Obtenha a versão do imagem do container do CoreDNS localizado no namespace kube-system e salve em /tmp/core-image.
+	kubectl describe pod coredns-5dd5756b68-q9cwb -n kube-system | grep Image
 
 12 Crie um POD com as seguintes características:
 	nome: ex-12
@@ -52,6 +55,8 @@
 	port: 80
 	
 	Após isso obtenha todas as variáveis de ambiente desse container e salve em /tmp/env-12
+
+	kubectl exec -it pod/ex-12 -- env > /tmp/env-12
 
 13 Crie um POD com as seguintes características:
 	nome: ex-13
@@ -61,6 +66,8 @@
 	env: enrironment=dev
 	
 	Após isso obtenha todas as variáveis de ambiente desse container e salve em /tmp/env-13
+
+	kubectl exec -it pod/ex-13 -- env > /tmp/env-13
 
 14 Crie um POD com as seguintes características:
 	nome: ex-14
@@ -75,6 +82,7 @@
 	args: sleep 3600
 
 16 Delete todos os pods no namespace default
+	kubectl delete pods --all -n default
 
 17 Crie um Deployment com as seguintes características:
 	nome: deploy-1
@@ -83,20 +91,30 @@
 	replicas: 1
 
 18 Consulte o status do Deployment criado anteriormente.
+	kubectl get deployments
 
 19 Altere a image do deployment para nginx:alpine.
+	kubectl apply -f ex-19.yaml --force
 
 20 Consulte todos os ReplicaSet criados por esse deployment.
+	kubectl get rp
 
 21 Altere a image do deployment para nginx:latest e adicione um motivo de causa.
+	kubectl set image deployment/deploy-1 nginx=nginx:latest
+	kubectl rollout history deployment/deploy-1
 
 22 Verifique qual imagem o deployment está utilizando e grave em /tmp/deploy-image.
+	kubectl describe deployment | grep Image > /tmp/deploy-image
 
 23 Escale esse deployment para 5 replicas utilizando o kubectl.
+	kubectl scale --replicas=5 deployment/de
+ploy-1
 
 24 Escale esse deployment para 2 replicas utilizando o kubectl edit.
+	KUBE_EDITOR="nano" kubectl edit deployment/deploy-1
 
 25 Verifique qual imagem o deployment está utilizando e grave em /tmp/deploy-image-pause.
+	kubectl describe deployment | grep Image > /tmp/deploy-image-pause
 
 26 Crie um Deployment com as seguintes características utilizando um yaml:
 	nome: deploy-30
@@ -113,6 +131,7 @@
 		command: sleep 3600
 
 27 Delete todos deployments no namespace default
+	kubectl delete pods --all -n default
 
 28 Criar um ConfiMap com as seguintes características utilizando um yaml:
 	nome: env-configs
@@ -120,9 +139,11 @@
 	SERVER=nginx
 
 29 Verifique o ConfiMap criado.
+	kubectl get configmap
 
 30 Obtenha todos os dados do ConfiMap criado para /tmp/configmap.
-
+	kubectl describe configmap/env-configs > /tmp/configmap
+	
 31 Crie um ConfiMap com as seguintes características utilizando o kubectl:
 	nome: env-configs-kubectl
 	tier=web
